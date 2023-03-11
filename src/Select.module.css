@@ -73,14 +73,19 @@
   cursor: pointer;
 }
 
-.option.highlighted {
-  background-color: hsl(200, 100%, 50%);
-  color: white;
+.option:hover {
+  background-color: red;
 }
 
 .option.selected {
   background-color: hsl(200, 100%, 70%);
 }
+
+.option.highlighted {
+  background-color: hsl(200, 100%, 50%);
+  color: white;
+}
+
 
 
 

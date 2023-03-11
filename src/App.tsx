@@ -1,20 +1,20 @@
-import React from 'react';
-import {Select} from "./Select";
+import React, {useState} from 'react';
+import {Select, SelectOption} from './Select';
 
 const options = [
-  {label: "First", value: 1},
-  {label: "Second", value: 2},
-  {label: "Third", value: 3},
-  {label: "Fourth", value: 3},
-]
+  {label: 'First', value: 1},
+  {label: 'Second', value: 2},
+  {label: 'Third', value: 3},
+  {label: 'Fourth', value: 4},
+];
 
 function App() {
-  const onChange = () => {
-  };
+  const [value, setValue] = useState<SelectOption | undefined>(options[0]);
 
   return (
-    <Select onChange={onChange} options={options}/>
+      <Select onChange={(option) => setValue(option)} options={options}
+              value={value}/>
   );
 }
 
-export default App
+export default App;
