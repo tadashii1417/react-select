@@ -6,26 +6,44 @@ export type SelectOption = {
   value: string | number
 }
 
-type SelectProps = {
-  options: SelectOption[]
+type SingleSelectProps = {
+  multiple: false
   value?: SelectOption
   onChange: (value: SelectOption | undefined) => void
 }
 
-export function Select({value, options, onChange}: SelectProps) {
+type MultipleSelectProps = {
+  multiple: true
+  value: SelectOption[]
+  onChange: (value: SelectOption[]) => void
+}
+
+type SelectProps = {
+  options: SelectOption[]
+} & (SingleSelectProps | MultipleSelectProps)
+
+export function Select({multiple, value, options, onChange}: SelectProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
 
   const clearOptions = () => {
-    onChange(undefined);
+    multiple ? onChange([]) : onChange(undefined);
   };
 
   const selectOption = (option: SelectOption) => {
-    if (option !== value) onChange(option);
+    if (multiple) {
+      if (value.includes(option)) {
+        onChange(value.filter(o => o !== option));
+      } else {
+        onChange([...value, option]);
+      }
+    } else {
+      if (option !== value) onChange(option);
+    }
   };
 
   function isOptionSelected(option: SelectOption) {
-    return option === value;
+    return multiple ? value.includes(option) : option === value;
   }
 
   useEffect(() => {
@@ -37,8 +55,20 @@ export function Select({value, options, onChange}: SelectProps) {
            onClick={() => setIsOpen(prev => !prev)}
            onBlur={() => setIsOpen(false)}
       >
-        <span className={styles.value}>{value?.label}</span>
-        <div className={styles[' clear-btn']} onClick={e => {
+        <span className={styles.value}>{multiple
+            ? value.map(val => <button
+                key={val.value}
+                className={styles['option-badge']}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectOption(val);
+                }}>
+              {val.label}
+              <span className={styles['remove-btn']}>&times;</span>
+            </button>)
+            : value?.label}</span>
+
+        <div className={styles['clear-btn']} onClick={e => {
           e.stopPropagation();
           clearOptions();
         }}>&times;</div>
