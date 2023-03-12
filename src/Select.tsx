@@ -1,5 +1,5 @@
 import styles from './Select.module.css';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 export type SelectOption = {
   label: string
@@ -25,6 +25,7 @@ type SelectProps = {
 export function Select({multiple, value, options, onChange}: SelectProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const clearOptions = () => {
     multiple ? onChange([]) : onChange(undefined);
@@ -50,8 +51,37 @@ export function Select({multiple, value, options, onChange}: SelectProps) {
     setHighlightedIndex(0);
   }, [isOpen]);
 
+  useEffect(() => {
+    const keyboardHandler = (e:KeyboardEvent) => {
+      switch (e.code) {
+        case "Enter":
+          setIsOpen(prev => !prev);
+          if(isOpen) selectOption(options[highlightedIndex]);
+          break;
+        case "ArrowDown": {
+          const nextIndex = highlightedIndex + 1;
+          if (nextIndex < options.length) setHighlightedIndex(nextIndex);
+          break;
+        }
+        case "ArrowUp": {
+          const nextIndex = highlightedIndex - 1;
+          if (nextIndex >= 0) setHighlightedIndex(nextIndex);
+          break;
+        }
+        case "Escape":
+          setIsOpen(false);
+          break;
+        default:
+          break;
+      }
+    };
+    containerRef?.current?.addEventListener('keydown', keyboardHandler);
+    return () => containerRef?.current?.removeEventListener('keydown', keyboardHandler);
+  }, [isOpen, highlightedIndex, options]);
+
   return (
       <div tabIndex={0} className={styles.container}
+           ref={containerRef}
            onClick={() => setIsOpen(prev => !prev)}
            onBlur={() => setIsOpen(false)}
       >
